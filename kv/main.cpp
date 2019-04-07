@@ -2,37 +2,63 @@
 #include <utility>
 #include <vector>
 #include <set>
+#include <thread>
 using namespace std;
 
 bool running = true;
-void thr1_add_data(KV & kv){
+void thr1_add_data(KV * kv, int interval){
     int i=0;
     while(running){
         char k[64];
         char v[64];
+        char line[128];
         sprintf(k,"thr1_k%d",i);
         sprintf(v,"thr1_v%d",i);
-
-        cout<<"--------thr1---"<<i<<"-----------"<<endl;
-        kv.Set(k,v);
-        kv.Show();
-        std::chrono::milliseconds du(200);
+        sprintf(line,"--------thr 1 --- %d ----------\n",i);
+        cout<<line;
+        kv->Set(k,v);
+        //kv->Show();
+        std::chrono::milliseconds du(interval);
         std::this_thread::sleep_for(du);
+        i++;
     }
 }
-void thr2_add_data(KV & kv){
+
+void thr2_add_data(KV * kv, int interval){
     int i=0;
     while(running){
         char k[64];
         char v[64];
+        char line[128];
         sprintf(k,"thr2_k%d",i);
         sprintf(v,"thr2_v%d",i);
 
-        cout<<"--------thr2---"<<i<<"-----------"<<endl;
-        kv.Set(k,v);
-        kv.Show();
-        std::chrono::milliseconds du(200);
+        sprintf(line,"--------thr 2 --- %d ----------\n",i);
+        cout<<line;
+        kv->Set(k,v);
+        //kv->Show();
+        std::chrono::milliseconds du(interval);
         std::this_thread::sleep_for(du);
+        i++;
+    }
+}
+
+void thr3_show_data(KV * kv, int interval){
+    int i=0;
+    while(running){
+        char k[64];
+        char v[64];
+        char line[128];
+        sprintf(k,"thr2_k%d",i);
+        sprintf(v,"thr2_v%d",i);
+
+        sprintf(line,"--------thr 3 --- %d ----------\n",i);
+        cout<<line;
+        //kv->Set(k,v);
+        kv->Show();
+        std::chrono::milliseconds du(interval);
+        std::this_thread::sleep_for(du);
+        i++;
     }
 }
 
@@ -78,9 +104,14 @@ void test(){
     }
 }
 int main(){
-    KV kv(100,1000);
-    std::thread thr1(thr1_add_data,kv);
-    std::thread thr2(thr1_add_data,kv);
 
+    KV kv(20,10000);
+    std::thread thr1(&thr1_add_data,&kv,100);
+    std::thread thr2(&thr2_add_data,&kv,200);
+    std::thread thr3(&thr3_show_data,&kv,1000);
+
+    thr1.join();
+    thr2.join();
+    thr3.join();
     return 0;
 }
