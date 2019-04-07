@@ -18,6 +18,22 @@ typedef string K;
 typedef string V;
 
 class KV{
+
+protected:
+    
+    //时间相关类型定义
+    typedef std::chrono::steady_clock steady_clock;
+    typedef std::chrono::steady_clock::time_point time_point;
+    typedef std::chrono::milliseconds milliseconds;
+    typedef long long time_span;
+    
+    //元数据
+    struct KVInfo{
+        K k;
+        V v;
+        time_point time;
+    };
+
 public:
     KV(int capcity ,long long timeout/*milliseconds*/)
         :m_capcity(capcity),
@@ -58,7 +74,7 @@ public:
             m_map[k] = m_queue.begin();
             
         }else{
-            //
+            //如果已有数据，则移到队尾。
             KVInfo item = *it->second;
             item.time = steady_clock::now();
             item.v = v;
@@ -108,22 +124,11 @@ protected:
         }
     }
 
-    //时间相关
-    typedef std::chrono::steady_clock steady_clock;
-    typedef std::chrono::steady_clock::time_point time_point;
-    typedef std::chrono::milliseconds milliseconds;
-    typedef long long time_span;
+    
     time_span GetTimeSpan(const time_point & start,const time_point &end){
         return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     }
 
-
-protected:
-    struct KVInfo{
-        K k;
-        V v;
-        time_point time;
-    };
 protected:
     int m_capcity;
     long long  m_timeout;
